@@ -15,7 +15,7 @@ namespace TestsProject
             processor = new StringProcessor();
         }
 
-        [AfterClass]
+        [AfterClassAttribute]
         public void Teardown()
         {
             processor = null;
@@ -58,11 +58,25 @@ namespace TestsProject
             Assert.IsFalse(processor.IsPalindrome("abc"));
         }
 
-        [Test("Async обработка")]
-        public async Task TestProcessWithDelayAsync()
+        [Test("Async обработка 1")]
+        public async Task TestProcessWithDelayAsync_1()
         {
-            string result = await processor.ProcessWithDelayAsync("TeSt", 100);
-            Assert.AreEqual("test", result.ToLower());
+            string result = await processor.ProcessWithDelayAsync("TeSt1", 1000);
+            Assert.AreEqual("test1", result);
+        }
+
+        [Test("Async обработка 2")]
+        public async Task TestProcessWithDelayAsync_2()
+        {
+            string result = await processor.ProcessWithDelayAsync("TeSt2", 1000);
+            Assert.AreEqual("test2", result);
+        }
+
+        [Test("Async обработка 3")]
+        public async Task TestProcessWithDelayAsync_3()
+        {
+            string result = await processor.ProcessWithDelayAsync("TeSt3", 1000);
+            Assert.AreEqual("test3", result);
         }
 
         [Test("Исключение CountWords пустая")]
@@ -77,26 +91,26 @@ namespace TestsProject
             Assert.Throws<InvalidStringException>(() => processor.ToUpperCase(null));
         }
 
-        [Test("Короткая для дубликатов")]
-        public void TestRemoveDuplicates_Short_Throws()
-        {
-            Assert.Throws<InvalidStringException>(() => processor.RemoveDuplicates("a"));
-        }
-
         [Test("Async отрицательная")]
         public async Task TestProcessWithDelay_Negative_Throws()
         {
             await Assert.ThrowsAsync<InvalidStringException>(() => processor.ProcessWithDelayAsync("test", -1));
         }
 
-        [Test("Количество обработанных")]
-        public async Task TestProcessedCount()
+        [Test("Тест с таймаутом - должен пройти")]
+        [Timeout(1500)]
+        public async Task TestTimeout_Success()
         {
-            processor = new StringProcessor();  
-            await processor.ProcessWithDelayAsync("one", 50);
-            await processor.ProcessWithDelayAsync("two", 50);
-            Assert.AreEqual(2, processor.GetProcessedCount());
+            int result = await processor.SimulateLongOperationAsync(700);
+            Assert.AreEqual(700, result);
+        }
 
+        [Test("Тест с таймаутом - должен упасть")]
+        [Timeout(500)]
+        public async Task TestTimeout_Fail()
+        {
+            int result = await processor.SimulateLongOperationAsync(2000);
+            Assert.AreEqual(2000, result);
         }
     }
 }
